@@ -43,6 +43,7 @@ function initLibrary()
         properties = properties or {}
 
 
+        print(class)
         local obj = Instance.new(class)
 
 
