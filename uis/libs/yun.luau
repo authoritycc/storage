@@ -10,11 +10,6 @@ Special Thanks To: Qw#1549
 - + some other things
 ]]
 
-setthreadidentity(8);
-
-local _Section, _Tab = nil, nil; 
-local _Label, _Text, _Button, _ColourPicker, _Toggle = nil, nil, nil, nil, nil
-
 function initLibrary()
     local folderName = "authority.cc"
 
@@ -209,7 +204,7 @@ function initLibrary()
     end
 
 
-    gui.Parent = gethui() or coreGui
+    gui.Parent = gethui()
 
 
     local flags = {toggles = {}, boxes = {}, sliders = {}, dropdowns = {}, multidropdowns = {}, keybinds = {}, colorpickers = {}}
