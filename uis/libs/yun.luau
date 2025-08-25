@@ -3720,7 +3720,12 @@ function initLibrary()
     --     })
     -- end 
 
-    -- Gui to Lua
+        -- Gui to Lua
+        -- Version: 3.2
+
+        -- Instances:
+
+        -- Gui to Lua
     -- Version: 3.2
 
     -- Instances:
@@ -3731,7 +3736,7 @@ function initLibrary()
 
     --Properties:
 
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.Parent = gethui()
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     ImageButton.Parent = ScreenGui
@@ -3741,7 +3746,7 @@ function initLibrary()
     ImageButton.BorderSizePixel = 0
     ImageButton.Position = UDim2.new(0.385304332, 0, 0.234517574, 0)
     ImageButton.Size = UDim2.new(0, 70, 0, 59)
-    ImageButton.ZIndex = 0
+    ImageButton.ZIndex = math.huge
     ImageButton.Image = "rbxassetid://129988549860720"
 
     UICorner.CornerRadius = UDim.new(0, 20)
@@ -3749,63 +3754,61 @@ function initLibrary()
 
     -- Scripts:
 
-    local function WPJKIV_fake_script() -- ImageButton.Drag 
+    local function XKXXRZH_fake_script() -- ImageButton.Dragify 
         local script = Instance.new('LocalScript', ImageButton)
-        
-        local UserInputService = game:GetService("UserInputService")
-        
-        local gui = script.Parent
-        
-        local dragging
-        local dragInput
-        local dragStart
-        local startPos
-        
-        local function update(input)
-            local delta = input.Position - dragStart
-            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+        local UIS = game:GetService("UserInputService")
+        function dragify(Frame)
+            dragToggle = nil
+            local dragSpeed = 0
+            dragInput = nil
+            dragStart = nil
+            local dragPos = nil
+            function updateInput(input)
+                local Delta = input.Position - dragStart
+                local Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + Delta.X, startPos.Y.Scale, startPos.Y.Offset + Delta.Y)
+                game:GetService("TweenService"):Create(Frame, TweenInfo.new(0.25), {Position = Position}):Play()
+            end
+            Frame.InputBegan:Connect(function(input)
+                if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and UIS:GetFocusedTextBox() == nil then
+                    dragToggle = true
+                    dragStart = input.Position
+                    startPos = Frame.Position
+                    input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragToggle = false
+                        end
+                    end)
+                end
+            end)
+            Frame.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                    dragInput = input
+                end
+            end)
+            
+            game:GetService("UserInputService").InputChanged:Connect(function(input)
+                if input == dragInput and dragToggle then
+                    updateInput(input)
+                end
+            end)
         end
         
-        gui.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                dragStart = input.Position
-                startPos = gui.Position
-                
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                    end
-                end)
-            end
+        script.Parent.MouseButton1Click:Connect(function ()
+            gui.Enabled = not gui.Enabled
         end)
-        
-        gui.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-                dragInput = input
-            end
-        end)
-        
-        UserInputService.InputChanged:Connect(function(input)
-            if input == dragInput and dragging then
-                update(input)
-            end
-        end)
+
+        dragify(script.Parent)
     end
+    coroutine.wrap(XKXXRZH_fake_script)()
 
-    ImageButton.MouseButton1Click:Connect(function ()
-        gui.Enabled = not gui.Enabled 
-    end)
-
-    coroutine.wrap(WPJKIV_fake_script)()
 
     
-    -- if inputService.TouchEnabled then
-    --     ScreenGui.Enabled = true 
-    -- else 
-    --     ScreenGui.Enabled = false 
-    -- end
-
+    if inputService.TouchEnabled then
+        ScreenGui.Enabled = true 
+    else 
+        ScreenGui.Enabled = false 
+    end
 
     return library
 end
