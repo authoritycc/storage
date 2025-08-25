@@ -624,7 +624,6 @@ function initLibrary()
 
 
                 function sectionTypes:Label(text)
-                    _Label = self
                     local label = utility.create("TextLabel", {
                         ZIndex = 3,
                         Size = UDim2.new(0, 0, 0, 14),
@@ -3720,6 +3719,93 @@ function initLibrary()
     --         end
     --     })
     -- end 
+
+    -- Gui to Lua
+    -- Version: 3.2
+
+    -- Instances:
+
+    local ScreenGui = Instance.new("ScreenGui")
+    local ImageButton = Instance.new("ImageButton")
+    local UICorner = Instance.new("UICorner")
+
+    --Properties:
+
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    ImageButton.Parent = ScreenGui
+    ImageButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+    ImageButton.BackgroundTransparency = 1.000
+    ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    ImageButton.BorderSizePixel = 0
+    ImageButton.Position = UDim2.new(0.385304332, 0, 0.234517574, 0)
+    ImageButton.Size = UDim2.new(0, 70, 0, 59)
+    ImageButton.ZIndex = 0
+    ImageButton.Image = "rbxassetid://129988549860720"
+
+    UICorner.CornerRadius = UDim.new(0, 20)
+    UICorner.Parent = ImageButton
+
+    -- Scripts:
+
+    local function WPJKIV_fake_script() -- ImageButton.Drag 
+        local script = Instance.new('LocalScript', ImageButton)
+        
+        local UserInputService = game:GetService("UserInputService")
+        
+        local gui = script.Parent
+        
+        local dragging
+        local dragInput
+        local dragStart
+        local startPos
+        
+        local function update(input)
+            local delta = input.Position - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+        
+        gui.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = gui.Position
+                
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+        
+        gui.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                update(input)
+            end
+        end)
+    end
+
+    ImageButton.MouseButton1Click:Connect(function ()
+        gui.Enabled = not gui.Enabled 
+    end)
+
+    coroutine.wrap(WPJKIV_fake_script)()
+
+    
+    if inputService.TouchEnabled then
+        ScreenGui.Enabled = true 
+    else 
+        ScreenGui.Enabled = false 
+    end
+
 
     return library
 end
