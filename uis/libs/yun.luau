@@ -10,6 +10,9 @@ Special Thanks To: Qw#1549
 - + some other things
 ]]
 
+local _Section, _Tab = nil, nil; 
+local _Label, _Text, _Button, _ColourPicker, _Toggle = nil, nil, nil, nil, nil
+
 function initLibrary()
     local folderName = "authority.cc"
 
@@ -40,7 +43,8 @@ function initLibrary()
         properties = properties or {}
 
 
-        print(class)
+        setthreadidentity(7)
+
         local obj = Instance.new(class)
 
 
@@ -204,7 +208,7 @@ function initLibrary()
     end
 
 
-    gui.Parent = gethui()
+    gui.Parent = gethui() or coreGui
 
 
     local flags = {toggles = {}, boxes = {}, sliders = {}, dropdowns = {}, multidropdowns = {}, keybinds = {}, colorpickers = {}}
@@ -425,8 +429,6 @@ function initLibrary()
 
 
         function windowTypes:Tab(name)
-            _Tab = self 
-
             windowTypes.count = windowTypes.count + 1
             name = name or "Tab"
 
@@ -802,7 +804,7 @@ function initLibrary()
                     local options = utility.table(opts)
                     local name = options.name or "Toggle"
                     local flag = options.flag 
-                    local callback = options.callback or function() end
+                    local callback = options.callback or options.Callback or function() end
 
 
                     local toggled = false
