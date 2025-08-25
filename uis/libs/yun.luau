@@ -3800,11 +3800,11 @@ function initLibrary()
     coroutine.wrap(WPJKIV_fake_script)()
 
     
-    if inputService.TouchEnabled then
-        ScreenGui.Enabled = true 
-    else 
-        ScreenGui.Enabled = false 
-    end
+    -- if inputService.TouchEnabled then
+    --     ScreenGui.Enabled = true 
+    -- else 
+    --     ScreenGui.Enabled = false 
+    -- end
 
 
     return library
