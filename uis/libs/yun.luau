@@ -798,12 +798,11 @@ function initLibrary()
 
 
                 function sectionTypes:Toggle(opts)
-                    _Toggle = self 
-                    
                     local options = utility.table(opts)
                     local name = options.name or "Toggle"
                     local flag = options.flag 
                     local callback = options.callback or options.Callback or function() end
+                    local callonstart = options.CallOnStart or options.callonstart or true 
 
 
                     local toggled = false
@@ -814,7 +813,9 @@ function initLibrary()
                     end
 
 
-                    callback(toggled)
+                    if callonstart then
+                       callback(toggled) 
+                    end
 
 
                     local toggle = utility.create("TextButton", {
@@ -3804,11 +3805,11 @@ function initLibrary()
 
 
     
-    if inputService.TouchEnabled then
-        ScreenGui.Enabled = true 
-    else 
-        ScreenGui.Enabled = false 
-    end
+    -- if inputService.TouchEnabled then
+    --     ScreenGui.Enabled = true 
+    -- else 
+    --     ScreenGui.Enabled = false 
+    -- end
 
     return library
 end
