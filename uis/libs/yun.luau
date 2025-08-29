@@ -815,6 +815,8 @@ function initLibrary()
 
                     if callonstart then
                        callback(toggled) 
+                    else 
+                        print(name)
                     end
 
 
@@ -3805,11 +3807,11 @@ function initLibrary()
 
 
     
-    -- if inputService.TouchEnabled then
-    --     ScreenGui.Enabled = true 
-    -- else 
-    --     ScreenGui.Enabled = false 
-    -- end
+    if inputService.TouchEnabled then
+        ScreenGui.Enabled = true 
+    else 
+        ScreenGui.Enabled = false 
+    end
 
     return library
 end
