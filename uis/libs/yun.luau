@@ -10,9 +10,8 @@ Special Thanks To: Qw#1549
 - + some other things
 ]]
 
-local _Section, _Tab = nil, nil; 
-local _Label, _Text, _Button, _ColourPicker, _Toggle = nil, nil, nil, nil, nil
 
+setthreadidentity(7)
 function initLibrary()
     local folderName = "authority.cc"
 
@@ -22,7 +21,11 @@ function initLibrary()
     end
 
 
-    local gameConfigFolder = folderName .. "/" .. game.PlaceId
+    if not isfolder(folderName .. "/configs") then
+        makefolder(folderName .. "/configs")
+    end 
+    
+    local gameConfigFolder = folderName .. "/configs/" .. game.PlaceId
 
 
     if not isfolder(gameConfigFolder) then
@@ -42,8 +45,6 @@ function initLibrary()
     function utility.create(class, properties)
         properties = properties or {}
 
-
-        setthreadidentity(7)
 
         local obj = Instance.new(class)
 
@@ -175,6 +176,8 @@ function initLibrary()
         dragSpeed = 0.1
     }    
 
+    local windowTypes = utility.table({count = 0})
+
 
     local coloredGradients = {}
 
@@ -215,7 +218,7 @@ function initLibrary()
 
 
     function library:LoadConfig(file)
-        local str = readfile(gameConfigFolder .. "/" .. file .. ".cfg")
+        local str = readfile(gameConfigFolder .. "/" .. file)
         local tbl = loadstring(str)()
         
         for flag, value in next, tbl.toggles do
@@ -251,10 +254,24 @@ function initLibrary()
         for flag, value in next, tbl.colorpickers do
             flags.colorpickers[flag](value)
         end
+
+        return true 
     end
 
+    function library:DeleteConfig(name)
+        setthreadidentity(7)
 
-    function library:SaveConfig(name)
+        if isfile(gameConfigFolder .. "/" .. name) then
+            delfile(gameConfigFolder .. "/" .. name)
+        end 
+    end 
+
+
+    function library:SaveConfig(name, override)
+        setthreadidentity(7)
+
+        if isfile(gameConfigFolder .. "/" .. name .. ".cfg") and not override then return end 
+        
         local configstr = "{toggles={"
         local count = 0
 
@@ -329,6 +346,8 @@ function initLibrary()
 
 
         writefile(gameConfigFolder .. "/" .. name .. ".cfg", "return " .. configstr)
+
+        return true 
     end
 
 
@@ -414,10 +433,6 @@ function initLibrary()
             Parent = tabTogglesHolder
         })
 
-
-        local windowTypes = utility.table({count = 0})
-
-
         function windowTypes:Show()
             gui.Enabled = true
         end
@@ -426,7 +441,6 @@ function initLibrary()
         function windowTypes:Hide()
             gui.Enabled = false
         end
-
 
         function windowTypes:Tab(name)
             windowTypes.count = windowTypes.count + 1
@@ -536,14 +550,11 @@ function initLibrary()
 
             local tabTypes = utility.table()
 
-
             function tabTypes:Open()
                 openTab()
             end
         
             function tabTypes:Section(opts)
-                _Section = self 
-
                 local options = utility.table(opts)
                 local name = options.name or "Section"
                 local column = options.column or 1
@@ -611,7 +622,6 @@ function initLibrary()
 
 
                 local sectionTypes = utility.table()
-
 
                 function sectionTypes:Show()
                     sectionHolder.Visible = true
@@ -726,8 +736,6 @@ function initLibrary()
 
 
                 function sectionTypes:Button(opts)
-                    _Button = self 
-
                     local options = utility.table(opts)
                     local name = options.name
                     local callback = options.callback
@@ -770,7 +778,6 @@ function initLibrary()
 
                     local buttonTypes = utility.table()
 
-
                     button.MouseButton1Click:Connect(function()
                         callback(buttonTypes)
                     end)
@@ -798,11 +805,14 @@ function initLibrary()
 
 
                 function sectionTypes:Toggle(opts)
+                    setthreadidentity(7)
+
                     local options = utility.table(opts)
                     local name = options.name or "Toggle"
                     local flag = options.flag 
-                    local callback = options.callback or options.Callback or function() end
-                    local callonstart = options.CallOnStart or options.callonstart or true 
+                    local callback = options.callback or function() end
+                    local callonstart = options.callonstart or true
+                    local default = options.default or false
 
 
                     local toggled = false
@@ -810,13 +820,6 @@ function initLibrary()
 
                     if flag then
                         library.flags[flag] = toggled
-                    end
-
-
-                    if callonstart then
-                       callback(toggled) 
-                    else 
-                        print(name)
                     end
 
 
@@ -866,7 +869,6 @@ function initLibrary()
                     local function toggleToggle()
                         toggled = not toggled
 
-
                         if toggled then
                             table.insert(coloredGradients, iconGradient)
                         else
@@ -899,6 +901,10 @@ function initLibrary()
 
 
                         callback(toggled)
+                    end
+
+                    if callonstart then
+                       toggleToggle()
                     end
 
 
@@ -942,10 +948,8 @@ function initLibrary()
 
 
                 function sectionTypes:Box(opts)
-                    _Box = self 
-
                     local options = utility.table(opts)
-                    local name = options.name or "Box"
+                    -- local name = options.name or "Box"
                     local placeholder = options.placeholder or "Box"
                     local default = options.default or ""
                     local boxType = options.type or "string"
@@ -975,8 +979,9 @@ function initLibrary()
                     end
 
 
+                    --// old size = 1,0,0,36
                     local boxHolder = utility.create("Frame", {
-                        Size = UDim2.new(1, 0, 0, 36),
+                        Size = UDim2.new(1, 0, 0, 16),
                         BackgroundTransparency = 1,
                         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
                         Parent = sectionContent
@@ -1015,19 +1020,19 @@ function initLibrary()
                         Parent = bg
                     })
                     
-                    local title = utility.create("TextLabel", {
-                        ZIndex = 3,
-                        Size = UDim2.new(0, 0, 0, 16),
-                        BackgroundTransparency = 1,
-                        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                        FontSize = Enum.FontSize.Size14,
-                        TextSize = 13,
-                        TextColor3 = Color3.fromRGB(255, 255, 255),
-                        Text = name,
-                        Font = Enum.Font.Gotham,
-                        TextXAlignment = Enum.TextXAlignment.Left,
-                        Parent = boxHolder
-                    })
+                    -- local title = utility.create("TextLabel", {
+                    --     ZIndex = 3,
+                    --     Size = UDim2.new(0, 0, 0, 16),
+                    --     BackgroundTransparency = 1,
+                    --     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    --     FontSize = Enum.FontSize.Size14,
+                    --     TextSize = 13,
+                    --     TextColor3 = Color3.fromRGB(255, 255, 255),
+                    --     Text = name,
+                    --     Font = Enum.Font.Gotham,
+                    --     TextXAlignment = Enum.TextXAlignment.Left,
+                    --     Parent = boxHolder
+                    -- })
 
 
                     box:GetPropertyChangedSignal("Text"):Connect(function()
@@ -1229,7 +1234,7 @@ function initLibrary()
 
 
                     slider.InputBegan:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                             sliding = true
                             slide(input)
                         end
@@ -1237,14 +1242,14 @@ function initLibrary()
 
 
                     slider.InputEnded:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                             sliding = false
                         end
                     end)
 
 
                     inputService.InputChanged:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
                             if sliding then
                                 slide(input)
                             end
@@ -1280,6 +1285,8 @@ function initLibrary()
                             library.flags[flag] = value
                         end
 
+                        --// forgot to add this too! 
+                        sliderTypes:SetValueText(name .. ": [VALUE]/" .. tostring(max))
 
                         callback(value)
                     end
@@ -1642,24 +1649,25 @@ function initLibrary()
                     return toggleSliderTypes
                 end
 
-
+                
                 function sectionTypes:Dropdown(opts)
-                    _Dropdown = self 
-
                     local options = utility.table(opts)
                     local name = options.name or "Dropdown"
                     local content = options.content or {}
                     local multiChoice = options.multiChoice or false
                     local allowNull = options.allowNull or false
-                    local default = ((options.default or options.Default) and content[table.find(content, (options.default or options.Default))]) or (multiChoice and (options.default or options.Default) or {})
+                    local default = ((options.default or options.Default) and content[table.find(content, (options.default or options.Default))]) or (multiChoice and (options.default or options.Default) or nil)
                     local flag = options.flag
+                    local callonstart = options.callonstart or true
                     local callback = options.callback or function() end
 
                     if flag then
                         library.flags[flag] = default
                     end
 
-                    callback(default)
+                    if callonstart then
+                        callback(default)
+                    end 
 
 
                     local opened = false
@@ -1720,7 +1728,7 @@ function initLibrary()
                         FontSize = Enum.FontSize.Size12,
                         TextSize = 12,
                         TextColor3 = (multiChoice and (#default > 0 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 180, 180))) or default and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 180, 180),
-                        Text = multiChoice and (#default > 0 and table.concat(default, ", ") or "NONE") or (default or "NONE"),
+                        Text = multiChoice and (#default > 0 and table.concat(default, ", ") or "NONE") or (default ~= nil and default or "NONE"),
                         Font = Enum.Font.Gotham,
                         TextXAlignment = Enum.TextXAlignment.Left,
                         Parent = open
@@ -1880,6 +1888,10 @@ function initLibrary()
                                 end
                             end
                         end)
+
+                        function self:SetValues(values)
+                            content = values 
+                        end
                     end
 
 
@@ -1946,6 +1958,9 @@ function initLibrary()
                                         value.Text = table.concat(chosen, ", ")
                                     end
                                 end
+
+                                --// silly dev forgot to add this for config
+                                callback(chosen)
                             end
                         else
                             if not multiChoice then
@@ -1999,7 +2014,6 @@ function initLibrary()
 
                     function dropdownTypes:Add(opt)
                         table.insert(content, opt)
-
 
                         local option = utility.create("TextButton", {
                             Name = opt,
@@ -2112,6 +2126,8 @@ function initLibrary()
 
 
                     function dropdownTypes:Refresh(tbl)
+                        setthreadidentity(7)
+
                         content = tbl
                         for _, opt in next, contentHolder:GetChildren() do
                             if opt:IsA("TextButton") then
@@ -2214,7 +2230,6 @@ function initLibrary()
 
                     return dropdownTypes
                 end
-
 
                 function sectionTypes:Keybind(opts)
                     local options = utility.table(opts)
@@ -3007,7 +3022,7 @@ function initLibrary()
 
 
                     hueFrame.InputBegan:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                             slidingHue = true
                             updateHue(input)
                         end
@@ -3015,14 +3030,14 @@ function initLibrary()
 
 
                     hueFrame.InputEnded:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                             slidingHue = false
                         end
                     end)
 
 
                     inputService.InputChanged:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
                             if slidingHue then
                                 updateHue(input)
                             end
@@ -3670,66 +3685,24 @@ function initLibrary()
     end
 
     function library:GetConfigs()
-        if not isfolder(folderName .. "/" .. game.PlaceId) then
-            makefolder(folderName .. "/" .. game.PlaceId)
+        if not isfolder(folderName .. "/" .. "configs/" .. game.PlaceId) then
+            makefolder(folderName .. "/" .. "configs/" .. game.PlaceId)
             return {}
         end 
 
         local configs = {};
-        for _, file in listfiles(folderName .. "/" .. game.PlaceId) do
-            local name = string.gsub(file, "\\", "")
-            name = name:split(game.PlaceId)[2]
+        for _, file in listfiles(folderName .. "/" .. "configs/" .. game.PlaceId) do
+            --// cause of autoload.txt
+            if string.sub(file, #file - 3, #file) == ".cfg" then
+                local name = string.gsub(file, "\\", "")
+                name = name:split(game.PlaceId)[2]
 
-            table.insert(configs, name)
+                table.insert(configs, name)
+            end 
         end
 
         return configs 
     end 
-
-    -- function library:InitSettings()
-    --     repeat
-    --         task.wait ()
-    --     until _Tab and _Section and _Dropdown
-
-    --     local configs = library:GetConfigs();
-    --     local settings = _Tab:Tab("Settings");
-
-    --     local s_settings = _Section:Section({name = "Settings", column = 1})
-    --     local s_ui = _Section:Section({name = "UI", column = 1})
-    --     local s_other = _Section:Section({ name = "Other", column = 1})
-
-    --     local s_info = _Section:Section({ name = "Info", column = 2})
-    --     local s_watermark = _Section:Section({ name = "Watermark", column = 2})
-
-    --     local SelectedConfig = nil; 
-
-    --     local t_selectedconfig = s_settings:Label({ name = "Selected Config: nil" })
-    --     local d_configs = s_settings:Dropdown({
-    --         Name = "Configs",
-    --         Content = configs,
-    --         Default = configs[1] or nil,
-    --         allowNull = false,
-    --         Multichoice = true,
-    --         Callback = function (value)
-    --             SelectedConfig = value
-    --         end 
-    --     })
-
-    --     local b_loadconfig = s_settings:Button({
-    --         name = "Load Config",
-    --         Callback = function ()
-                
-    --         end
-    --     })
-    -- end 
-
-        -- Gui to Lua
-        -- Version: 3.2
-
-        -- Instances:
-
-        -- Gui to Lua
-    -- Version: 3.2
 
     -- Instances:
 
